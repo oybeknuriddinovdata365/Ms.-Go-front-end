@@ -1,0 +1,20 @@
+export const doctors = Array.from({ length: 50 }, (_, i) => ({
+  id: i + 1,
+  name: `Dr. Doctor ${i + 1}`,
+  role: "Heart Specialist",
+  phone: "+998 91 555-0127",
+  experience: 8,
+  bio: "8 yillik tajribaga ega mutaxassis",
+  services: ["Konsultatsiya", "Tish davolash", "Rentgen"],
+  documents: [
+    { id: 1, name: "Passport (oldi va orqasi)" },
+    { id: 2, name: "Diplom" },
+    { id: 3, name: "Sertifikat" },
+  ],
+  rating: 4.7,
+  reviews: 250,
+  visits: 165,
+  income: "54,145,841.00 UZS",
+  speciality: ["Dentist", "LOR"],
+  avatar: `https://i.pravatar.cc/150?img=${i + 10}`,
+}));
