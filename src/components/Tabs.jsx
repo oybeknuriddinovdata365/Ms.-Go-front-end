@@ -39,7 +39,7 @@ import DoctorInfo from "./DoctorInfo";
 const TABS = [
   { key: "docs", label: "Hujjatlar" },
   { key: "services", label: "Xizmat turlari" },
-  { key: "info", label: "Shifokor ma’lumotlari" },
+  { key: "info", label: "Shifokor haqida" },
 ];
 
 function Tabs({ doctor }) {
