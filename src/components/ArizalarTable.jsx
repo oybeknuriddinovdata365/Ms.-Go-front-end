@@ -143,7 +143,7 @@ const datas = [
 ];
 
   const [open, setOpen] = useState(false);
-   const [data, setData] = useState(datas);
+  const [data, setData] = useState(datas);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [reason, setReason] = useState("");
@@ -173,136 +173,93 @@ const datas = [
   setSelectedRow(null);
 };
 
-
-  
   return <>
     <div className="bg-white rounded-xl border border-gray-100">
       <div className="flex items-center gap-3 px-6 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Arizalar
-        </h2>
-
-        <span className="text-sm text-blue-600 font-medium">
-          {data.length}
-        </span>
+        <h2 className="text-lg font-semibold text-gray-900">Arizalar</h2>
+        <span className="text-sm text-blue-600 font-medium">{data.length}</span>
       </div>
-
       <Table className='custom-table' columns={columns} dataSource={datas} size="middle" />
     </div>
-    <Modal
-  open={open}
-  onCancel={() => setOpen(false)}
-  footer={null}
-  width={520}
-  title={`#${selectedRow?.id} arizani tekshirish`}
->
-  {selectedRow && (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-xs text-gray-500">Telefon raqami</label>
-          <Input value={selectedRow.phoneNumber} disabled />
-        </div>
 
-        <div>
-          <label className="text-xs text-gray-500">Holati</label>
-          <Input
-            value={
-              selectedRow.status === "pending"
-                ? "Kutilmoqda"
-                : selectedRow.status === "approved"
-                ? "Ruxsat berilgan"
-                : "Rad etilgan"
-            }
-            disabled
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-500">Yuborilgan sana</label>
-          <Input value={selectedRow.date} disabled />
-        </div>
-      </div>
-
-      <div>
-        <p className="font-medium mb-2">Hujjatlar [5]</p>
-
-        <div className="space-y-2 text-sm">
-          {[
-            "Passport fotosurati (oldi va orqasi)",
-            "Diplom",
-            "O‘z-o‘zini band qilish",
-            "Sertifikat",
-            "Tibbiy varaqa",
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between border rounded-md px-3 py-2"
-            >
-              <span>{item}</span>
-              <button className="text-blue-600">Ko‘rish</button>
+    <Modal open={open} onCancel={() => setOpen(false)} footer={null} width={520} title={`#${selectedRow?.id} arizani tekshirish`}>
+      {selectedRow && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-gray-500">Telefon raqami</label>
+              <Input value={selectedRow.phoneNumber} disabled />
             </div>
-          ))}
+
+            <div>
+              <label className="text-xs text-gray-500">Holati</label>
+              <Input
+                value={
+                  selectedRow.status === "pending"
+                    ? "Kutilmoqda"
+                    : selectedRow.status === "approved"
+                    ? "Ruxsat berilgan"
+                    : "Rad etilgan"
+                }
+                disabled
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500">Yuborilgan sana</label>
+              <Input value={selectedRow.date} disabled />
+            </div>
+          </div>
+
+          <div>
+            <p className="font-medium mb-2">Hujjatlar [5]</p>
+
+            <div className="space-y-2 text-sm">
+              {[
+                "Passport fotosurati (oldi va orqasi)",
+                "Diplom",
+                "O'z-o'zini band qilish",
+                "Sertifikat",
+                "Tibbiy varaqa",
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between border rounded-md px-3 py-2"
+                >
+                  <span>{item}</span>
+                  <button className="text-blue-600">Ko'rish</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button onClick={() => setOpen(false)} className="px-4 py-2 border rounded-md">Orqaga</button>
+
+            <button className="px-4 py-2 bg-red-500 text-white rounded-md">Arizani bekor qilish</button>
+
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md">Tasdiqlash</button>
+          </div>
+        </div>
+      )}
+    </Modal>
+
+    <Modal open={rejectModalOpen} onCancel={() => setRejectModalOpen(false)} footer={null} title="Arizani bekor qilish">
+      <div className="space-y-4">
+        <div>
+          <label className="text-sm font-medium">Bekor qilish sabablari</label>
+          <Input placeholder="Sababni kiriting" value={reason} onChange={(e) => setReason(e.target.value)}/>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4">
+          <button onClick={() => setRejectModalOpen(false)} className="px-4 py-2 border rounded-lg">
+            Ortga
+          </button>
+
+          <button onClick={submitReject} className="px-4 py-2 bg-blue-600 text-white rounded-lg" disabled={!reason}>Yuborish</button>
         </div>
       </div>
-
-      <div className="flex justify-end gap-3 pt-4">
-        <button
-          onClick={() => setOpen(false)}
-          className="px-4 py-2 border rounded-md"
-        >
-          Orqaga
-        </button>
-
-        <button className="px-4 py-2 bg-red-500 text-white rounded-md">
-          Arizani bekor qilish
-        </button>
-
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-md">
-          Tasdiqlash
-        </button>
-      </div>
-    </div>
-  )}
-</Modal>
-<Modal
-  open={rejectModalOpen}
-  onCancel={() => setRejectModalOpen(false)}
-  footer={null}
-  title="Arizani bekor qilish"
->
-  <div className="space-y-4">
-    <div>
-      <label className="text-sm font-medium">
-        Bekor qilish sabablari
-      </label>
-      <Input
-        placeholder="Sababni kiriting"
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-      />
-    </div>
-
-    <div className="flex justify-end gap-3 pt-4">
-      <button
-        onClick={() => setRejectModalOpen(false)}
-        className="px-4 py-2 border rounded-lg"
-      >
-        Ortga
-      </button>
-
-      <button
-        onClick={submitReject}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-        disabled={!reason}
-      >
-        Yuborish
-      </button>
-    </div>
-  </div>
-</Modal>
-
-
+    </Modal>
   </>
 };
 export default ArizalarTable;
