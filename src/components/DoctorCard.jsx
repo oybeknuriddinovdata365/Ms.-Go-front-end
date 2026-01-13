@@ -31,14 +31,12 @@ function DoctorCard({doctor}) {
       <div className="flex flex-col gap-2">
         <button
           onClick={() => navigate(`/shifokorlar/${doctor.id}/qabullar`)}
-          // onClick={() => navigate(`/doctorId/qabullar`)}
           className="px-5 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium">
           Shifokorning qabullari
         </button>
 
         <button
           onClick={() => navigate(`/shifokorlar/${doctor.id}`)}
-          // onClick={() => navigate(`/doctorId/`)}
           className="px-5 py-2 rounded-xl border border-gray-300 text-sm font-medium text-gray-700">
           Batafsil
         </button>

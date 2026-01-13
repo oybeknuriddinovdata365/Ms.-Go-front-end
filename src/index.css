@@ -33,3 +33,19 @@
   padding: 16px 20px !important;
   font-weight: 500;
 }
+
+.rdp {
+  --rdp-accent-color: #2563eb;
+  --rdp-background-color: #e0e7ff;
+}
+
+.rdp-day {
+  border-radius: 12px;
+  height: 40px;
+  width: 40px;
+}
+
+.rdp-day_selected {
+  background: #2563eb;
+  color: white;
+}
