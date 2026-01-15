@@ -47,10 +47,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* <div className="shadow-sm p-5 rounded-[10px] border border-[#F2F4F7]">
-        <div></div>
-      </div> */}
       <Chart/>
     </div>
   );

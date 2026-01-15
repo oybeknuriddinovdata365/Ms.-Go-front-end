@@ -1,36 +1,3 @@
-// import React from 'react';
-// import { Segmented, Tabs } from 'antd';
-// const onChange = key => {
-//   console.log(key);
-// };
-// const items = [
-//   { key: '1', children: 'Content of Tab Pane 1' },
-//   { key: '2', children: 'Content of Tab Pane 2' },
-//   { key: '3', children: 'Content of Tab Pane 3' },
-// ];
-// const TabsJS = () => {
-//   const [alignValue, setAlignValue] = React.useState('center');
-//   return (
-//     <>
-//       <Segmented
-//         value={alignValue}
-//         style={{ marginBottom: 8 }}
-//         onChange={setAlignValue}
-//         options={['start', 'center', 'end']}
-//       />
-//       <Tabs
-//         defaultActiveKey="1"
-//         items={items}
-//         onChange={onChange}
-//         indicator={{ size: origin => origin - 20, align: alignValue }}
-//       />
-//     </>
-//   );
-// };
-// export default TabsJS;
-
-
-
 import { useState } from "react";
 import Documents from "./Document";
 import Services from "./Services";

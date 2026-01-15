@@ -1,9 +1,7 @@
 import SearchIcon from "../assets/Images/search-icon.svg";
 import FilterIcon from "../assets/Images/filter-icon.svg";
 import { useState } from "react";
-import StatusBadge from "../components/StatusBadge";
 import ArizalarTable from "../components/ArizalarTable";
-import { applications } from "../utils/applications"; 
 
 function Arizalar() {
   const [openFilter, setOpenFilter] = useState(false);
