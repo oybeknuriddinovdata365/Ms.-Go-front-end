@@ -49,3 +49,46 @@
   background: #2563eb;
   color: white;
 }
+
+.payment-table .ant-table {
+  border: none;
+}
+
+.payment-table .ant-table-thead > tr > th {
+  background: #f9fafb;
+  color: #667085;
+  font-weight: 500;
+}
+
+.payment-table .ant-table-tbody > tr > td {
+  padding: 20px 16px;
+}
+
+.payment-table .ant-table-cell::before {
+  display: none;
+}
+
+
+.payment-table .ant-table {
+  width: 100%;
+}
+
+.payment-table .ant-table-container {
+  border-radius: 0;
+}
+
+.payment-table .ant-table-thead > tr > th {
+  padding: 16px 24px;
+  background: #f9fafb;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.payment-table .ant-table-tbody > tr > td {
+  padding: 15px 24px;
+}
+
+.payment-table .ant-table-cell::before {
+  display: none;
+}

@@ -7,7 +7,7 @@ function StatusBadge({ status }) {
       dot: "bg-yellow-400",
     },
     approved: {
-      label: "Ruxsat berilgan",
+      label: "Muvaffaqiyatli",
       bg: "bg-green-50",
       text: "text-green-700",
       dot: "bg-green-500",

@@ -3,7 +3,7 @@ import SearchIcon from "../assets/Images/search-icon.svg";
 import FilterIcon from "../assets/Images/filter-icon.svg";
 import DoctorCard from "../components/DoctorCard";
 import Pagination from "../components/Pagination";
-import { doctors } from "../utils/doctor";
+import { doctors } from "../utils/doctorData";
 
 function Shifokorlar() {
   const [openFilter, setOpenFilter] = useState(false);

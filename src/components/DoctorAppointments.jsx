@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { doctors } from "../utils/doctor"
+import { doctors } from "../utils/doctorData"
 import { patients } from "../utils/patients"
 import PatientsList from "./PatientsList"
 

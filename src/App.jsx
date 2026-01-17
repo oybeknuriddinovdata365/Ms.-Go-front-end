@@ -8,7 +8,8 @@ import Adminstrator from "./pages/Adminstrator";
 import ProfileEdit from "./pages/ProfileEdit";
 import DashboardLayout from "./layouts/DashboardLayout";
 import LogoutModal from "./components/LogoutModal";
-import DoctorDetail from "./components/DoctorDetail";
+import DoctorDetail from "./pages/DoctorDetail";
+import PatientDetail from "./pages/PatientDetail";
 import DoctorAppointments from "./components/DoctorAppointments";
 
 function PrivateRoute({ children }) {
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/profile" element={<ProfileEdit />} />
 
         <Route path="/shifokorlar/:id" element={<DoctorDetail />} />
+        <Route path="/bemorlar/:id" element={<PatientDetail/>} />
         <Route path="/shifokorlar/:id/qabullar" element={<DoctorAppointments/>} />
       </Route>
 

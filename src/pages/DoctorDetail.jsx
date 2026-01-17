@@ -1,17 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import StarIcon from "../assets/Images/star-icon.svg";
 import CheckIcon from "../assets/Images/check-icon.svg";
-import FileIcon from "../assets/Images/file-icon.svg";
-import EyeIcon from "../assets/Images/eye-icon.svg";
-import TrashIcon from "../assets/Images/trash-icon.svg";
 import ArrowLeft from "../assets/Images/arrow-left.svg";
 import EditIcon from "../assets/Images/edit-icon.svg";
 import LikeIcon from "../assets/Images/like-icon.svg";
 import PhoneIcon from "../assets/Images/phone-icon.svg";
 import CalendarIcon from "../assets/Images/calendar-icon.svg";
 import HospitalIcon from "../assets/Images/hospital-icon.svg";
-import { doctors } from "../utils/doctor";
-import Tabs from "./Tabs"
+import { doctors } from "../utils/doctorData";
+import Tabs from "../components/Tabs"
 
 function DoctorDetail() {
   const { id } = useParams();
@@ -93,7 +90,7 @@ function DoctorDetail() {
             <Tabs doctor={doctor}/>
           </div>
         </div>
-      </div>
+    </div>
   );
 }
 
