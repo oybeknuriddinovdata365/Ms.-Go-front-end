@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Input, Table } from 'antd';
 import StatusBadge from './StatusBadge';
+import Document from "./Document"
 
 const ArizalarTable = () => {
   const columns = [
@@ -214,26 +215,14 @@ const datas = [
           <div>
             <p className="font-medium mb-2">Hujjatlar [5]</p>
 
-            <div className="space-y-2 text-sm">
-              {[
-                "Passport fotosurati (oldi va orqasi)",
-                "Diplom",
-                "O'z-o'zini band qilish",
-                "Sertifikat",
-                "Tibbiy varaqa",
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between border rounded-md px-3 py-2"
-                >
-                  <span>{item}</span>
-                  <button className="text-blue-600">Ko'rish</button>
-                </div>
-              ))}
-            </div>
+            <Document/>
+            <Document/>
+            <Document/>
+            <Document/>
+            <Document/>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-2">
             <button onClick={() => setOpen(false)} className="px-4 py-2 border rounded-md">Orqaga</button>
 
             <button className="px-4 py-2 bg-red-500 text-white rounded-md">Arizani bekor qilish</button>

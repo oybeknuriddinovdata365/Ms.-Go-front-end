@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom"
 import { doctors } from "../utils/doctorData"
 import { patients } from "../utils/patients"
 import PatientsList from "./PatientsList"
+import HorizontalCalendar from "./HorizontalCalendar"
 
 function DoctorAppointments() {
   const { id } = useParams()
@@ -27,7 +28,9 @@ const [selectedPatient, setSelectedPatient] = useState(patients[0])
         </span>
       </div>
 
-      <div className="shadow-xl w-full h-[100px] text-center p-5 font-bold text-2xl mb-6">Calendar place</div>
+      <div className="shadow-xl w-full rounded-lg text-center font-bold text-2xl mb-6">
+        <HorizontalCalendar/>
+      </div>
 
       <div className="grid grid-cols-12 gap-6">
        {/* Left place  */}
