@@ -3,9 +3,11 @@ import LoginDocImage from "../assets/Images/LoginDocImage.webp"
 import Logo from "../assets/Images/Logo.svg"
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { adminLogin } from "../services/auth";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState("");
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
@@ -16,39 +18,45 @@ export default function Login() {
     password: ''
   });
 
-  function handleLogin(e) {
-    e.preventDefault();
-    
-    const newErrors = { email: '', password: '' };
-    
-    if (!formData.email) {
-      newErrors.email = 'Email manzilini kiriting';
-    } else if (!formData.email.includes('@')) {
-      newErrors.email = 'Bu elektron pochta manzili "@" mavjud emas';
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Parolni kiriting';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Kamida 8 ta belgidan iborat bo\'lishi kerak.';
-    }
-    
-    setErrors(newErrors);
-    
-    if (!newErrors.email && !newErrors.password) {
-      alert('Login muvaffaqiyatli! Dashboard ga yo\'naltirilmoqda...');
-      // setTimeout(() => {
-      //   navigate('/dashboard');
-      // }, 500);
-      localStorage.setItem("token", "demo-token");
-      navigate('/dashboard');
+  async function handleLogin(e) {
+  e.preventDefault()
+
+  const newErrors = { email: "", password: "" }
+
+  if (!formData.email) {
+    newErrors.email = "Email manzilini kiriting"
+  } else if (!formData.email.includes("@")) {
+    newErrors.email = '"@" mavjud emas'
+  }
+
+  if (!formData.password) {
+    newErrors.password = "Parolni kiriting"
+  } else if (formData.password.length < 8) {
+    newErrors.password = "Kamida 8 ta belgi"
+  }
+
+  setErrors(newErrors)
+
+  if (newErrors.email || newErrors.password) return
+
+  try {
+    const res = await adminLogin(formData)
+
+    localStorage.setItem("accessToken", res.accessToken)
+    localStorage.setItem("refreshToken", res.refreshToken)
+    localStorage.setItem("admin", JSON.stringify(res.admin))
+
+
+    navigate("/dashboard")
+  } catch (err) {
+    setServerError(err.message)
     }
   }
 
     useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) navigate("/dashboard");
-  }, []);
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) navigate("/dashboard");
+  }, [navigate]);
 
   return (
     <div className="flex items-start w-full min-h-screen bg-gray-50">
@@ -123,24 +131,20 @@ export default function Login() {
             {errors.password && (
               <p className="text-sm text-red-600">{errors.password}</p>
             )}
+            {serverError && (
+              <p className="text-sm text-red-600 text-center">
+                {serverError}
+              </p>
+            )}
           </div>
-
-          <button
-            onClick={handleLogin}
-            className="bg-blue-500 cursor-pointer hover:bg-blue-600 text-white font-medium py-3 rounded-lg mt-2 transition-colors"
-          >
+          <button type="submit" onClick={handleLogin} className="bg-blue-500 cursor-pointer hover:bg-blue-600 text-white font-medium py-3 rounded-lg mt-2 transition-colors">
             Kirish
           </button>
         </div>
       </div>
 
       <div className="w-[40%] h-screen flex items-start justify-start overflow-hidden p-6">
-        <img
-                  src={LoginDocImage}
-                  alt="Doctor"
-                  loading="lazy"
-                  className="w-full h-full object-contain rounded-2xl"
-                />
+        <img src={LoginDocImage} alt="Doctor" loading="lazy" className="w-full h-full object-contain rounded-2xl"/>
       </div>
     </div>
   );

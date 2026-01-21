@@ -56,7 +56,7 @@ const HorizontalCalendar = () => {
                 setSelectedDay(day.format("YYYY-MM-DD"))
               }
               className={`
-                flex h-16 min-w-[56px] cursor-pointer flex-col
+                flex h-16 min-w-14 cursor-pointer flex-col
                 items-center justify-center rounded-lg
                 ${
                   isSelected

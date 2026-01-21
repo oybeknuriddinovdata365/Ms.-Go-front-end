@@ -13,7 +13,7 @@ export default function LogoutModal() {
   if (!open) return null;
 
   function doLogout() {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
     window.location.href = "/login";
   }
 

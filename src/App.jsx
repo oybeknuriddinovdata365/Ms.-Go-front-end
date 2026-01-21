@@ -13,13 +13,13 @@ import PatientDetail from "./pages/PatientDetail";
 import DoctorAppointments from "./components/DoctorAppointments";
 
 function PrivateRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  const accessToken = localStorage.getItem("accessToken");
+  return accessToken ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? <Navigate to="/dashboard" replace /> : children;
+  const accessToken = localStorage.getItem("accessToken");
+  return accessToken ? <Navigate to="/dashboard" replace /> : children;
 }
 
 export default function App() {
