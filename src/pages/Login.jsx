@@ -8,6 +8,7 @@ import { adminLogin } from "../services/auth";
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
@@ -18,7 +19,7 @@ export default function Login() {
     password: ''
   });
 
-  async function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault()
 
   const newErrors = { email: "", password: "" }
@@ -40,20 +41,30 @@ export default function Login() {
   if (newErrors.email || newErrors.password) return
 
   try {
+    setIsLoading(true);
+    setServerError("");
+
     const res = await adminLogin(formData)
 
+    // Token'larni saqlash
     localStorage.setItem("accessToken", res.accessToken)
     localStorage.setItem("refreshToken", res.refreshToken)
+    
+    // Admin ma'lumotlarini saqlash
     localStorage.setItem("admin", JSON.stringify(res.admin))
-
+    
+    // adminId auth.js da allaqachon saqlangan
 
     navigate("/dashboard")
   } catch (err) {
-    setServerError(err.message)
-    }
+    console.error("Login xatolik:", err);
+    setServerError(err.message || "Login jarayonida xatolik yuz berdi")
+  } finally {
+    setIsLoading(false);
   }
+}
 
-    useEffect(() => {
+  useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) navigate("/dashboard");
   }, [navigate]);
@@ -82,8 +93,10 @@ export default function Login() {
                 onChange={(e) => {
                   setFormData({...formData, email: e.target.value});
                   if (errors.email) setErrors({...errors, email: ''});
+                  if (serverError) setServerError('');
                 }}
                 className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} px-3 py-2 rounded-lg focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-red-500' : 'focus:ring-blue-500'} focus:border-transparent`}
+                disabled={isLoading}
               />
               {errors.email && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -110,8 +123,10 @@ export default function Login() {
                 onChange={(e) => {
                   setFormData({...formData, password: e.target.value});
                   if (errors.password) setErrors({...errors, password: ''});
+                  if (serverError) setServerError('');
                 }}
                 className={`w-full border ${errors.password ? 'border-red-500' : 'border-gray-300'} px-3 py-2 rounded-lg focus:outline-none focus:ring-2 ${errors.password ? 'focus:ring-red-500' : 'focus:ring-blue-500'} focus:border-transparent pr-20`}
+                disabled={isLoading}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                 {errors.password && (
@@ -123,6 +138,7 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -131,14 +147,23 @@ export default function Login() {
             {errors.password && (
               <p className="text-sm text-red-600">{errors.password}</p>
             )}
-            {serverError && (
+          </div>
+
+          {serverError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <p className="text-sm text-red-600 text-center">
                 {serverError}
               </p>
-            )}
-          </div>
-          <button type="submit" onClick={handleLogin} className="bg-blue-500 cursor-pointer hover:bg-blue-600 text-white font-medium py-3 rounded-lg mt-2 transition-colors">
-            Kirish
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            onClick={handleLogin} 
+            disabled={isLoading}
+            className="bg-blue-500 cursor-pointer hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg mt-2 transition-colors"
+          >
+            {isLoading ? "Yuklanmoqda..." : "Kirish"}
           </button>
         </div>
       </div>
