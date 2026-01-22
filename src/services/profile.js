@@ -50,3 +50,18 @@ export const getProfile = () => {
 export const updateProfile = (id, data) => {
   return api.put(`/admin/${id}`, data);
 };
+
+/**
+ * Parolni o'zgartirish
+ * @param {Object} data - { currentPassword, newPassword, confirmPassword }
+ * @returns {Promise<Object>}
+ */
+export const changePassword = (data) => {
+  const adminId = getAdminId();
+  
+  if (!adminId) {
+    return Promise.reject(new Error("Admin ID topilmadi. Iltimos, qaytadan login qiling."));
+  }
+  
+  return api.patch(`/admin/${adminId}/change-password`, data);
+};
