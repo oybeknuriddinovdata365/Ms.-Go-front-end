@@ -1,19 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { PencilIcon, TrashIcon, X } from "lucide-react"
 import SearchIcon from "../assets/Images/search-icon.svg"
-
-const adminsData = [
-  { id: 1, name: "Olivia Rhye", phone: "+998 94 426 0303", date: "Dec 07, 2025", status: "active" },
-  { id: 2, name: "Phoenix Baker", phone: "+998 91 412 1212", date: "Dec 09, 2024", status: "blocked" },
-  { id: 3, name: "Phoenix Baker", phone: "+998 99 907 4331", date: "Dec 09, 2024", status: "active" },
-  { id: 4, name: "Demi Wilkinson", phone: "+998 98 180 0122", date: "Dec 01, 2025", status: "active" },
-  { id: 5, name: "Toshpo'lat", phone: "+998 98 180 0122", date: "Jan 11, 2026", status: "blocked" },
-]
-
-const getAdmins = () => {
-  const saved = localStorage.getItem("admins")
-  return saved ? JSON.parse(saved) : adminsData
-}
+import { getAdmins, createAdmin, updateAdmin, deleteAdmin } from "../services/admin";
 
 
 function StatusBadge({ status }) {
@@ -28,109 +16,227 @@ function StatusBadge({ status }) {
   }
 
   return (
-  <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs rounded-full font-medium ${styles[status]}`}>
-    
-    <span className={`w-2 h-2 rounded-full ${
-      status === "active" ? "bg-green-500" : "bg-red-500"
+    <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs rounded-full font-medium ${styles[status]}`}>
+      <span className={`w-2 h-2 rounded-full ${
+        status === "active" ? "bg-green-500" : "bg-red-500"
       }`}/>
       {labels[status]}
     </span>
-)
+  )
 }
 
 export default function Adminstrator() {
-  const [admins, setAdmins] = useState(getAdmins)
+  const [admins, setAdmins] = useState([])
   const [search, setSearch] = useState("")
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [errors, setErrors] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    password: ""
+  });
 
   const [form, setForm] = useState({
     name: "",
     phone: "",
     status: "active",
-    login: "",
+    email: "",
     password: "",
   })
 
-  const filtered = admins.filter(a =>
-    a.name.toLowerCase().includes(search.toLowerCase())
-  )
+  // Email validatsiya funksiyasi
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const addAdmin = () => {
-  if (!form.name || !form.phone || !form.login) return
+  // Form validatsiya
+  const validateForm = () => {
+    const newErrors = {
+      name: "",
+      phone: "",
+      email: "",
+      password: ""
+    };
 
-  if (editing) {
-    setAdmins(prev =>
-      prev.map(a =>
-        a.id === editing.id
-          ? { ...a, name: form.name, phone: form.phone, status: form.status }
-          : a
-      )
-    )
+    let isValid = true;
 
-    setEditing(null)
-  } else {
-    const newAdmin = {
-      id: Date.now(),
-      name: form.name,
-      phone: form.phone,
-      date: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      }),
-      status: form.status,
+    // Ism tekshirish (har doim majburiy)
+    if (!form.name.trim()) {
+      newErrors.name = "Ism majburiy";
+      isValid = false;
     }
 
-    setAdmins(prev => [newAdmin, ...prev])
-  }
+    // Telefon tekshirish (har doim majburiy)
+    if (!form.phone.trim()) {
+      newErrors.phone = "Telefon raqami majburiy";
+      isValid = false;
+    }
 
-  setOpen(false)
-  setForm({ name: "", phone: "", status: "active", login: "", password: "" })
-}
+    if (!editing) {
+      // CREATE uchun - email va password MAJBURIY
+      if (!form.email.trim()) {
+        newErrors.email = "Email majburiy";
+        isValid = false;
+      } else if (!isValidEmail(form.email)) {
+        newErrors.email = "Email formati noto'g'ri";
+        isValid = false;
+      }
 
+      if (!form.password.trim()) {
+        newErrors.password = "Password majburiy";
+        isValid = false;
+      } else if (form.password.length < 8) {
+        newErrors.password = "Password kamida 8 ta belgidan iborat bo'lishi kerak";
+        isValid = false;
+      }
+    } else {
+      // UPDATE uchun - email va password OPTIONAL, lekin to'ldirilsa validatsiya qilinadi
+      if (form.email.trim() && !isValidEmail(form.email)) {
+        newErrors.email = "Email formati noto'g'ri";
+        isValid = false;
+      }
+
+      if (form.password.trim() && form.password.length < 8) {
+        newErrors.password = "Password kamida 8 ta belgidan iborat bo'lishi kerak";
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const addAdmin = async () => {
+    // Validatsiya
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      if (editing) {
+        // UPDATE - barcha maydonlar yuboriladi, lekin backend bo'sh bo'lganlarni ignore qiladi
+        const payload = {
+          fullname: form.name,
+          phone: form.phone,
+          is_active: form.status === "active",
+        };
+
+        // Email to'ldirilgan bo'lsa qo'shamiz
+        if (form.email.trim()) {
+          payload.email = form.email;
+        }
+
+        // Password to'ldirilgan bo'lsa qo'shamiz
+        if (form.password.trim()) {
+          payload.password = form.password;
+        }
+
+        await updateAdmin(editing.id, payload);
+      } else {
+        // CREATE - barcha maydonlar majburiy
+        await createAdmin({
+          fullname: form.name,
+          phone: form.phone,
+          email: form.email,
+          password: form.password,
+          role: "admin",
+          is_active: form.status === "active",
+        });
+      }
+
+      await fetchAdmins();
+      closeModal();
+    } catch (err) {
+      console.log("Error found:", err?.response?.data);
+      
+      // Backend dan kelgan xatoliklarni ko'rsatish
+      if (err?.response?.data?.message) {
+        const message = Array.isArray(err.response.data.message) 
+          ? err.response.data.message.join(", ") 
+          : err.response.data.message;
+        alert(message);
+      }
+    }
+  };
 
   const startEdit = (admin) => {
-  setEditing(admin)
+    setEditing(admin);
+    setForm({
+      name: admin.name,
+      phone: admin.phone,
+      status: admin.status,
+      email: admin.email, // Eski email ko'rsatiladi
+      password: "", // Password bo'sh (xavfsizlik uchun)
+    });
+    setOpen(true);
+  };
 
-  setForm({
-    name: admin.name,
-    phone: admin.phone,
-    status: admin.status,
-    login: admin.login || "",
-    password: ""
-  })
+  const removeAdmin = async (id) => {
+    if (!confirm("Rostdan o'chirasizmi?")) return;
 
-  setOpen(true)
-}
-
-
-  const deleteAdmin = (id) => {
-    setAdmins(prev => prev.filter(a => a.id !== id))
-  }
+    try {
+      await deleteAdmin(id);
+      await fetchAdmins();
+    } catch (err) {
+      console.log("Delete error:", err?.response?.data);
+      alert("O'chirishda xatolik yuz berdi");
+    }
+  };
 
   const closeModal = () => {
-  setOpen(false)
-  setEditing(null)
-  setForm({
-    name: "",
-    phone: "",
-    status: "active",
-    login: "",
-    password: ""
-  })
-}
+    setOpen(false);
+    setEditing(null);
+    setForm({
+      name: "",
+      phone: "",
+      status: "active",
+      email: "",
+      password: "",
+    });
+    setErrors({
+      name: "",
+      phone: "",
+      email: "",
+      password: ""
+    });
+  };
 
+  const fetchAdmins = async () => {
+    try {
+      const res = await getAdmins();
+
+      const mapped = res.data.map(a => ({
+        id: a.id,
+        name: a.fullname,
+        phone: a.phone,
+        email: a.email,
+        date: new Date(a.created_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+        }),
+        status: a.is_active ? "active" : "blocked",
+      }));
+
+      setAdmins(mapped);
+    } catch (err) {
+      console.log("Fetch error:", err);
+    }
+  };
 
   useEffect(() => {
-  localStorage.setItem("admins", JSON.stringify(admins))
-}, [admins])
+    fetchAdmins();
+  }, []);
 
+  // Qidiruv funksiyasi
+  const filteredAdmins = admins.filter(admin => 
+    admin.name.toLowerCase().includes(search.toLowerCase()) ||
+    admin.phone.includes(search) ||
+    admin.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="w-full space-y-11">
-
-      {/* HEader */}
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <h2 className="text-[24px] font-semibold text-[#121212]">
           Adminstrator
@@ -148,18 +254,26 @@ export default function Adminstrator() {
             <img src={SearchIcon} alt="search" className="w-4 h-4" />
           </div>
 
-          <button onClick={() => {
-            setEditing(null)
-            setForm({
-              name: "",
-              phone: "",
-              status: "active",
-              login: "",
-              password: ""
-            })
-            setOpen(true)
-          }} 
-          className="px-4 h-10 bg-[#1067FF] text-white rounded-lg hover:opacity-80 cursor-pointer">
+          <button 
+            onClick={() => {
+              setEditing(null)
+              setForm({
+                name: "",
+                phone: "",
+                status: "active",
+                email: "",
+                password: ""
+              })
+              setErrors({
+                name: "",
+                phone: "",
+                email: "",
+                password: ""
+              })
+              setOpen(true)
+            }} 
+            className="px-4 h-10 bg-[#1067FF] text-white rounded-lg hover:opacity-80 cursor-pointer"
+          >
             Qo'shish
           </button>
         </div>
@@ -171,7 +285,7 @@ export default function Adminstrator() {
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <h3 className="text-lg leading-7 font-semibold text-[#121212]">Administrator</h3>
-            <span className="text-xs font-medium text-[#0F5EE8]">{admins.length} users</span>
+            <span className="text-xs font-medium text-[#0F5EE8]">{filteredAdmins.length} users</span>
           </div>
         </div>
 
@@ -185,40 +299,52 @@ export default function Adminstrator() {
         </div>
 
         {/* ROWS */}
-        {filtered.map(admin => (
-          <div
-            key={admin.id}
-            className="grid grid-cols-12 px-6 py-4 border-b border-[#EAECF0] last:border-none items-center hover:bg-gray-50"
-          >
-            <div className="col-span-5 font-medium text-gray-900">
-              {admin.name}
-            </div>
-
-            <div className="col-span-2 text-gray-600">
-              {admin.phone}
-            </div>
-
-            <div className="col-span-2 text-gray-600">
-              {admin.date}
-            </div>
-
-            <div className="col-span-2">
-              <StatusBadge status={admin.status} />
-            </div>
-
-            <div className="col-span-1 flex items-center gap-3 text-gray-500">
-              <div>
-                <TrashIcon onClick={() => deleteAdmin(admin.id)} className="w-4 h-4 cursor-pointer text-red-500"/>
-              </div>
-              <div>
-                <PencilIcon onClick={() => startEdit(admin)} className="w-4 h-4 cursor-pointer text-blue-600"/>
-              </div>
-
-            </div>
+        {filteredAdmins.length === 0 ? (
+          <div className="px-6 py-8 text-center text-gray-500">
+            Ma'lumot topilmadi
           </div>
-        ))}
+        ) : (
+          filteredAdmins.map(admin => (
+            <div
+              key={admin.id}
+              className="grid grid-cols-12 px-6 py-4 border-b border-[#EAECF0] last:border-none items-center hover:bg-gray-50"
+            >
+              <div className="col-span-5 font-medium text-gray-900">
+                {admin.name}
+              </div>
 
+              <div className="col-span-2 text-gray-600">
+                {admin.phone}
+              </div>
+
+              <div className="col-span-2 text-gray-600">
+                {admin.date}
+              </div>
+
+              <div className="col-span-2">
+                <StatusBadge status={admin.status} />
+              </div>
+
+              <div className="col-span-1 flex items-center gap-3 text-gray-500">
+                <div>
+                  <TrashIcon 
+                    onClick={() => removeAdmin(admin.id)} 
+                    className="w-4 h-4 cursor-pointer text-red-500 hover:text-red-700"
+                  />
+                </div>
+                <div>
+                  <PencilIcon 
+                    onClick={() => startEdit(admin)} 
+                    className="w-4 h-4 cursor-pointer text-blue-600 hover:text-blue-800"
+                  />
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
+
+      {/* MODAL */}
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-[700px] p-6 relative">
@@ -226,45 +352,143 @@ export default function Adminstrator() {
               <X className="w-6 h-6"/>
             </button>
 
-            <h3  className="text-lg font-bold text-[#2C3E50] mb-4">{editing ? "Tahrirlash" : "Administrator qo'shish"}</h3>
+            <h3 className="text-lg font-bold text-[#2C3E50] mb-4">
+              {editing ? "Tahrirlash" : "Administrator qo'shish"}
+            </h3>
 
             <div className="border border-[#EAECF0] m-7 w-full mx-auto"/>
 
             <div className="flex flex-col gap-4">
+              {/* FISH */}
               <label className="flex flex-col gap-2">
-                <span className="font-medium text-sm leading-5 text-[#344054]">FISH</span>
-                <input placeholder="Ismini kiriting" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full shadow-xs border border-[#D0D5DD] rounded-lg px-4 py-3"/> 
+                <span className="font-medium text-sm leading-5 text-[#344054]">
+                  FISH*
+                </span>
+                <input 
+                  placeholder="Ismini kiriting" 
+                  value={form.name} 
+                  onChange={e => {
+                    setForm({ ...form, name: e.target.value })
+                    if (errors.name) {
+                      setErrors({ ...errors, name: "" })
+                    }
+                  }} 
+                  className={`w-full shadow-xs border rounded-lg px-4 py-3 ${
+                    errors.name ? "border-red-500" : "border-[#D0D5DD]"
+                  }`}
+                /> 
+                {errors.name && (
+                  <span className="text-sm text-red-500">{errors.name}</span>
+                )}
               </label>
 
-              <div className="flex items-center justify-between w-full">
+              {/* TELEFON VA HOLAT */}
+              <div className="flex items-start justify-between w-full gap-4">
                 <label className="w-[49%] flex flex-col gap-2">
-                  <span className="font-medium text-sm leading-5 text-[#344054]">Telefon raqami</span>
-                  <input placeholder="Telefon" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full border shadow-xs rounded-lg px-4 py-3 border-[#D0D5DD]"/>
+                  <span className="font-medium text-sm leading-5 text-[#344054]">
+                    Telefon raqami*
+                  </span>
+                  <input 
+                    placeholder="+998 90 123 45 67" 
+                    value={form.phone} 
+                    onChange={e => {
+                      setForm({ ...form, phone: e.target.value })
+                      if (errors.phone) {
+                        setErrors({ ...errors, phone: "" })
+                      }
+                    }} 
+                    className={`w-full border shadow-xs rounded-lg px-4 py-3 ${
+                      errors.phone ? "border-red-500" : "border-[#D0D5DD]"
+                    }`}
+                  />
+                  {errors.phone && (
+                    <span className="text-sm text-red-500">{errors.phone}</span>
+                  )}
                 </label>
 
                 <label className="w-[49%] flex flex-col gap-2">
-                  <span className="font-medium text-sm leading-5 text-[#344054]">Holati</span>
-                  <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full border rounded-lg text-[#667085] px-4 py-3 shadow-xs bg-[#F9FAFB] border-[#D0D5DD]">
+                  <span className="font-medium text-sm leading-5 text-[#344054]">
+                    Holati
+                  </span>
+                  <select 
+                    value={form.status} 
+                    onChange={e => setForm({ ...form, status: e.target.value })} 
+                    className="w-full border rounded-lg text-[#667085] px-4 py-3 shadow-xs bg-[#F9FAFB] border-[#D0D5DD]"
+                  >
                     <option value="active">Aktiv</option>
                     <option value="blocked">Bloklangan</option>
                   </select>
                 </label>
               </div>
 
-              <div className="flex items-start justify-between w-full">
+              {/* EMAIL VA PASSWORD */}
+              <div className="flex items-start justify-between w-full gap-4">
                 <label className="w-[49%] flex flex-col gap-2">
-                  <span className="font-medium text-sm leading-5 text-[#344054]">Login*</span>
-                  <input placeholder="Kiriting" value={form.login} onChange={e => setForm({ ...form, login: e.target.value })} className="w-full border border-[#D0D5DD] shadow-xs rounded-lg px-4 py-3"/>
+                  <span className="font-medium text-sm leading-5 text-[#344054]">
+                    Email{!editing && "*"}
+                  </span>
+                  <input
+                    type="email"
+                    placeholder="example@gmail.com"
+                    value={form.email}
+                    onChange={(e) => {
+                      setForm({ ...form, email: e.target.value });
+                      if (errors.email) {
+                        setErrors({ ...errors, email: "" });
+                      }
+                    }}
+                    className={`w-full border shadow-xs rounded-lg px-4 py-3 ${
+                      errors.email ? "border-red-500" : "border-[#D0D5DD]"
+                    }`}
+                  />
+                  {errors.email && (
+                    <span className="text-sm text-red-500">{errors.email}</span>
+                  )}
+                  {editing && !errors.email && (
+                    <span className="text-sm leading-5 text-[#475467]">
+                      O'zgartirish ixtiyoriy
+                    </span>
+                  )}
                 </label>
+
                 <label className="w-[49%] flex flex-col gap-2">
-                  <span className="font-medium text-sm leading-5 text-[#344054]">Password*</span>
-                  <input placeholder="Kiriting" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} className="w-full shadow-xs border border-[#D0D5DD] rounded-lg px-4 py-3"/>
-                  <span className="text-sm leading-5 text-[#475467]">Must be at least 8 characters.</span>
+                  <span className="font-medium text-sm leading-5 text-[#344054]">
+                    Password{!editing && "*"}
+                  </span>
+                  <input 
+                    placeholder={editing ? "Yangi parol (ixtiyoriy)" : "Kamida 8 ta belgi"} 
+                    type="password" 
+                    value={form.password} 
+                    onChange={e => {
+                      setForm({ ...form, password: e.target.value })
+                      if (errors.password) {
+                        setErrors({ ...errors, password: "" })
+                      }
+                    }} 
+                    className={`w-full shadow-xs border rounded-lg px-4 py-3 ${
+                      errors.password ? "border-red-500" : "border-[#D0D5DD]"
+                    }`}
+                  />
+                  {errors.password && (
+                    <span className="text-sm text-red-500">{errors.password}</span>
+                  )}
+                  {!errors.password && (
+                    <span className="text-sm leading-5 text-[#475467]">
+                      {editing 
+                        ? "Bo'sh qoldiring agar o'zgartirmoqchi bo'lmasangiz" 
+                        : "Kamida 8 ta belgidan iborat bo'lishi kerak"
+                      }
+                    </span>
+                  )}
                 </label>
               </div>
 
+              {/* SAQLASH TUGMASI */}
               <div className="text-end">
-                <button onClick={addAdmin} className="w-[100px] h-10 bg-[#1067FF] shadow-xs text-white rounded-lg mt-4 cursor-pointer">
+                <button 
+                  onClick={addAdmin} 
+                  className="w-[100px] h-10 bg-[#1067FF] shadow-xs text-white rounded-lg mt-4 cursor-pointer hover:bg-[#0052CC]"
+                >
                   {editing ? "Saqlash" : "Qo'shish"}
                 </button>
               </div>
@@ -273,6 +497,5 @@ export default function Adminstrator() {
         </div>
       )}
     </div>
-    
   )
 }
